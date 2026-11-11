@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safe Frame</title>
+<style>
+:root{--bg:#fff;--fg:#111;--bar:#eee;--accent:#0a64d8;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root{--bg:#111;--fg:#f2f2f2;--bar:#222;--accent:#4d9bff}}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Helvetica,Arial,sans-serif}
+body{display:flex;flex-direction:column}
+#bar{display:flex;gap:12px;padding:12px;background:var(--bar)}
+#url{flex:1;font-size:28px;padding:12px;border-radius:8px;border:2px solid var(--accent);background:var(--bg);color:var(--fg)}
+button{font-size:28px;padding:12px 24px;border:0;border-radius:8px;background:var(--accent);color:#fff}
+button:focus{outline:4px solid var(--fg)}
+#frame{flex:1;border:0;width:100%;background:#fff}
+#note{padding:8px 12px;font-size:20px;opacity:.8}
+</style>
+</head>
+<body>
+<div id="bar">
+  <input id="url" type="text" placeholder="Type a website, e.g. example.com" autocomplete="off">
+  <button id="go">Go</button>
+  <button id="reload">Reload</button>
+</div>
+<div id="note">Redirects and popups from the site are blocked. If the frame goes blank, the site tried to send you away.</div>
+<iframe id="frame" sandbox="allow-scripts allow-forms allow-same-origin" referrerpolicy="no-referrer"></iframe>
+<script>
+(function(){
+  var input=document.getElementById('url'), frame=document.getElementById('frame'), last='';
+  function norm(v){v=v.trim();if(!v)return '';if(!/^https?:\/\//i.test(v))v='https://'+v;return v;}
+  function go(){var u=norm(input.value);if(!u)return;last=u;frame.src='about:blank';setTimeout(function(){frame.src=u;},50);
+    try{localStorage.setItem('lastUrl',u);}catch(e){}}
+  document.getElementById('go').onclick=go;
+  document.getElementById('reload').onclick=function(){if(last){frame.src='about:blank';setTimeout(function(){frame.src=last;},50);}};
+  input.addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+  try{var s=localStorage.getItem('lastUrl');if(s)input.value=s;}catch(e){}
+})();
+</script>
+</body>
+</html>
